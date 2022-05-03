@@ -28,7 +28,7 @@ void setup() {
   // End of trinket special code
 
   strip.begin();
-  strip.setBrightness(2);
+  strip.setBrightness(30);
   strip.show(); // Initialize all pixels to 'off'
 }
 
@@ -38,11 +38,12 @@ void loop() {
   colorWipe(strip.Color(0, 255, 0), 50); // Green
   colorWipe(strip.Color(0, 0, 255), 50); // Blue
   colorWipe(strip.Color(0, 0, 0, 255), 50); // White RGBW
-  allColorHold(strip.Color(255, 0, 0), 4000);
-  allColorHold(strip.Color(255, 255, 0), 4000);
-  allColorHold(strip.Color(255, 255, 255), 4000);
-  allColorHold(strip.Color(0, 0, 0, 255), 4000);
-  allColorHold(strip.Color(255, 255, 255, 255), 4000);
+  pixelFade();
+  //allColorHold(strip.Color(255, 0, 0), 4000);
+  //allColorHold(strip.Color(255, 255, 0), 4000);
+  //allColorHold(strip.Color(255, 255, 255), 4000);
+  //allColorHold(strip.Color(0, 0, 0, 255), 4000);
+  //allColorHold(strip.Color(255, 255, 255, 255), 4000);
   // Send a theater pixel chase in...
   //theaterChase(strip.Color(127, 127, 127), 50); // White
   //theaterChase(strip.Color(127, 0, 0), 50); // Red
@@ -53,13 +54,39 @@ void loop() {
   //theaterChaseRainbow(50);
 }
 
+// fade a color in and out on a specific pixel
+void pixelFade() {
+  for(int i = 0; i < strip.numPixels(); i++) {
+    // start by setting everything to zero
+    for (int j = 0; j < strip.numPixels(); j++) {
+      strip.setPixelColor(j, strip.Color(0, 0, 0, 0));
+    }
+
+    // fade the pixel in
+    for (int j = 0; j < 256; j++) {
+      strip.setPixelColor(i, strip.Color(j, 0, 0, 0));
+      strip.show();
+      delay(2);
+    }
+
+    // fade the pixel out
+    for (int j = 255; j > 0; j--) {
+      strip.setPixelColor(i, strip.Color(j, 0, 0, 0));
+      strip.show();
+      delay(2);
+    }
+  }
+}
+
 // set all pixels to the same color and hold
 void allColorHold(uint32_t color, unsigned long wait) {
   for(int i = 0; i < strip.numPixels(); i++) {
     strip.setPixelColor(i, color);
   }
   strip.show();
-  delay(wait);
+  if (wait > 0) {
+    delay(wait);
+  }
 }
 
 // Fill the dots one after the other with a color
