@@ -1,0 +1,46 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "~/.arduino15/packages/arduino/hardware/arduino/avr/cores/arduino/",
+                "~/.arduino15/packages/arduino/hardware/arduino/avr/libraries/EEPROM/",
+                "~/.arduino15/packages/arduino/hardware/arduino/avr/libraries/HID/",
+                "~/.arduino15/packages/arduino/hardware/arduino/avr/libraries/SPI/",
+                "~/.arduino15/packages/arduino/hardware/arduino/avr/libraries/SoftwareSerial/",
+                "~/.arduino15/packages/arduino/hardware/arduino/avr/libraries/Wire/",
+                "~/.arduino15/packages/arduino/hardware/tools/avr/avr/include/",
+                "~/.arduino15/packages/arduino/hardware/tools/avr/avr/include/avr/",
+                "~/.arduino15/packages/arduino/hardware/tools/avr/avr/include/compat/",
+                "~/.arduino15/packages/arduino/hardware/tools/avr/avr/include/util/",
+                "~/.arduino15/packages/arduino/hardware/tools/avr/lib/gcc/avr/4.*.*/include/",
+                "~/.arduino15/packages/arduino/hardware/tools/avr/lib/gcc/avr/4.*.*/include-fixed/",
+                "~/.arduino15/packages/arduino/libraries/Bridge/src/",
+                "~/.arduino15/packages/arduino/libraries/Esplora/src/",
+                "~/.arduino15/packages/arduino/libraries/Ethernet/src/",
+                "~/.arduino15/packages/arduino/libraries/Firmata/src/",
+                "~/.arduino15/packages/arduino/libraries/GSM/src/",
+                "~/.arduino15/packages/arduino/libraries/LiquidCrystal/src/",
+                "~/.arduino15/packages/arduino/libraries/Robot_Control/src/",
+                "~/.arduino15/packages/arduino/libraries/RobotIRremote/src/",
+                "~/.arduino15/packages/arduino/libraries/Robot_Motor/src/",
+                "~/.arduino15/packages/arduino/libraries/SD/src/",
+                "~/.arduino15/packages/arduino/libraries/Servo/src/",
+                "~/.arduino15/packages/arduino/libraries/SpacebrewYun/src/",
+                "~/.arduino15/packages/arduino/libraries/Stepper/src/",
+                "~/.arduino15/packages/arduino/libraries/Temboo/src/",
+                "~/.arduino15/packages/arduino/libraries/TFT/src/",
+                "~/.arduino15/packages/arduino/libraries/WiFi/src/",
+                "~/Arduino/libraries/**",
+                "~/.arduino15/packages/arduino/**"
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "gnu17",
+            "cppStandard": "gnu++14",
+            "intelliSenseMode": "linux-gcc-x64"
+        }
+    ],
+    "version": 4
+}
