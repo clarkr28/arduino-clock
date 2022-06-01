@@ -7,7 +7,7 @@ const char * password = "Is it basketball season yet?";
 int     HTTP_PORT     = 80;
 String  HTTP_METHOD   = "GET";
 char    HOST_NAME[]   = "worldclockapi.com";
-String  PATH_NAME     = "/api/json/est/now";
+String  PATH_NAME     = "/api/json/cst/now";
 int     VERBOSE_WIFI  = 0;
 int     VERBOSE_TIME  = 1;
 
@@ -45,7 +45,8 @@ int getMinutes(TimeKeeper* tk, unsigned long msCurr) {
 
 int getSecondsInt(TimeKeeper* tk, unsigned long msCurr) {
   unsigned long msToday = getMsToday(tk, msCurr);
-  return (int) (msToday % (3600 * 1000) / (60 * 1000 * 60 * 1000));
+  unsigned long msThisMinute = msToday % (60 * 1000);
+  return (int) msThisMinute / 1000;
 }
 
 
@@ -130,14 +131,16 @@ void loop()
   while(1) {
     updateTime(&tk);
 
-    unsigned long ms = millis();
-    Serial.print("hours: ");
-    Serial.println(getHours(&tk, ms));
-    Serial.print("minutes: ");
-    Serial.println(getMinutes(&tk, ms));
-    Serial.print("seconds: ");
-    Serial.println(getSecondsInt(&tk, ms));
-    
-    delay(800);
+    for (int i=0; i < 30; i++) {
+      unsigned long ms = millis();
+      Serial.print("hours: ");
+      Serial.println(getHours(&tk, ms));
+      Serial.print("minutes: ");
+      Serial.println(getMinutes(&tk, ms));
+      Serial.print("seconds: ");
+      Serial.println(getSecondsInt(&tk, ms));
+
+      delay(200);
+    }
   }  
 }
