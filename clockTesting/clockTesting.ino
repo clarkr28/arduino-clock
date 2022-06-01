@@ -43,8 +43,13 @@ int getMinutes(TimeKeeper* tk, unsigned long msCurr) {
   return (int) (msToday % (3600 * 1000) / (60 * 1000));
 }
 
+int getSecondsInt(TimeKeeper* tk, unsigned long msCurr) {
+  unsigned long msToday = getMsToday(tk, msCurr);
+  return (int) (msToday % (3600 * 1000) / (60 * 1000 * 60 * 1000));
+}
 
-void setTime(TimeKeeper* tk) {
+
+void updateTime(TimeKeeper* tk) {
   if (client.connect(HOST_NAME, HTTP_PORT)) {
     if (VERBOSE_WIFI) {
       Serial.println("Connected");  
@@ -110,9 +115,7 @@ void setup()
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
   if (WiFi.waitForConnectResult() != WL_CONNECTED) {
-    if (VERBOSE_WIFI) {
-      Serial.println("WiFi Failed");    
-    }
+    Serial.println("WiFi Failed");    
     while(1) {
         delay(1000);
     }
@@ -122,16 +125,18 @@ void setup()
 void loop()
 {
   TimeKeeper tk;
-  setTime(&tk);
+  updateTime(&tk);
   
   while(1) {
-    setTime(&tk);
+    updateTime(&tk);
 
     unsigned long ms = millis();
     Serial.print("hours: ");
     Serial.println(getHours(&tk, ms));
     Serial.print("minutes: ");
     Serial.println(getMinutes(&tk, ms));
+    Serial.print("seconds: ");
+    Serial.println(getSecondsInt(&tk, ms));
     
     delay(800);
   }  
