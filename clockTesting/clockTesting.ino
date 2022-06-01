@@ -131,16 +131,15 @@ void loop()
   while(1) {
     updateTime(&tk);
 
-    for (int i=0; i < 30; i++) {
+    for (int i=0; i < 500; i++) {
+      char serialBuff[50];
       unsigned long ms = millis();
-      Serial.print("hours: ");
-      Serial.println(getHours(&tk, ms));
-      Serial.print("minutes: ");
-      Serial.println(getMinutes(&tk, ms));
-      Serial.print("seconds: ");
-      Serial.println(getSecondsInt(&tk, ms));
-
-      delay(200);
+      int hours = getHours(&tk, ms);
+      int minutes = getMinutes(&tk, ms);
+      int seconds = getSecondsInt(&tk, ms);
+      sprintf(serialBuff, "%02i:%02i:%02i", hours, minutes, seconds);
+      Serial.println(serialBuff);
+      delay(500);
     }
   }  
 }
