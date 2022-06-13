@@ -20,7 +20,7 @@ String  HTTP_METHOD   = "GET";
 char    HOST_NAME[]   = "worldclockapi.com";
 String  PATH_NAME     = "/api/json/cst/now";
 int     VERBOSE_WIFI  = 0;
-int     VERBOSE_TIME  = 0;
+int     VERBOSE_TIME  = 1;
 WiFiClient client;
 AsyncUDP udp;
 
@@ -36,6 +36,7 @@ struct ClockState {
   int hours;
   int minutes;
   int seconds;
+  float fracSeconds;
   uint32_t hoursColor;
   uint32_t minutesColor;
   uint32_t secondsColor;
@@ -65,6 +66,13 @@ int getSecondsInt(TimeKeeper* tk, unsigned long msCurr) {
   unsigned long msToday = getMsToday(tk, msCurr);
   unsigned long msThisMinute = msToday % (60 * 1000);
   return (int) msThisMinute / 1000;
+}
+
+/* If the time is 4:15:03.123, this returns 03.123 */
+float getFracSecond(TimeKeeper* tk, unsigned long msCurr) {
+  unsigned long msToday = getMsToday(tk, msCurr);
+  unsigned long msThisMinute = msToday % (60 * 1000);
+  return (float) msThisMinute / 1000.0; 
 }
 
 
@@ -103,7 +111,7 @@ void updateTime(TimeKeeper* tk) {
 
           setTime(tk, atoll(timeString), arduinoTime);
 
-          if (VERBOSE_TIME || VERBOSE_WIFI) {
+          if (VERBOSE_WIFI) {
             Serial.println("found the time!");
             Serial.println(timePosition);
             Serial.println(timeString);
@@ -189,8 +197,9 @@ void loop()
       int hours = getHours(&tk, ms);
       int minutes = getMinutes(&tk, ms);
       int seconds = getSecondsInt(&tk, ms);
+      float fracSeconds = getFracSecond(&tk, ms);
       if (VERBOSE_TIME) {
-        sprintf(serialBuff, "%02i:%02i:%02i", hours, minutes, seconds);
+        sprintf(serialBuff, "%02i:%02i:%02i %f", hours, minutes, seconds, fracSeconds);
         Serial.println(serialBuff);
       }
 
@@ -198,6 +207,7 @@ void loop()
       cs.hours = hours;
       cs.minutes = minutes;
       cs.seconds = seconds;
+      cs.fracSeconds = fracSeconds;
       displayTime(&cs);
       
       delay(100);
