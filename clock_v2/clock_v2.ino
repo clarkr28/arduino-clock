@@ -67,9 +67,23 @@ struct DriftCorrector {
  * dc: DriftCorrector reference to initialize
  */
 void initDriftCorrector(DriftCorrector* dc) {
-  dc.startTime = millis();
-  dc.cf = 0;
-  return &dc;
+  dc->startTime = millis();
+  dc->cf = 1;
+}
+
+/**
+ * a drift correction wrapper for millis
+ */
+unsigned long millisCorrected(DriftCorrector* dc) {
+  long millisTime = (long) millis();
+  
+  // make sure drift corrector is initialized
+  if (dc->startTime == 0 || dc->cf == 0 || dc->startTime > millisTime) {
+    return (unsigned long) millisTime;
+  }
+
+  unsigned long correction = floor((( (double) millisTime - dc->startTime) / 60000) * dc->cf);
+  return (unsigned long) millisTime + correction;
 }
 
 
@@ -116,7 +130,7 @@ float getFracSecond(TimeKeeper* tk, unsigned long msCurr) {
 }
 
 
-void updateTime(TimeKeeper* tk) {
+void updateTime(TimeKeeper* tk, DriftCorrector* dc) {
   if (client.connect(HOST_NAME, HTTP_PORT)) {
     if (VERBOSE_WIFI) {
       Serial.println("Connected");  
@@ -129,7 +143,7 @@ void updateTime(TimeKeeper* tk) {
 
     char buff[1000];
     while(client.connected()) {
-      unsigned long arduinoTime = millis();
+      unsigned long arduinoTime = millisCorrected(dc);
       if(client.available()){
         // read an incoming byte from the server and print it to serial monitor:
         //char c = client.read();
@@ -218,8 +232,10 @@ void displayTime(ClockState* cs) {
 
 void loop()
 {
+  DriftCorrector dc;
+  initDriftCorrector(&dc);
   TimeKeeper tk;
-  updateTime(&tk);
+  updateTime(&tk, &dc);
   ClockState cs;
 
   // set colors to use for clock
@@ -228,12 +244,12 @@ void loop()
   cs.secondsColor = strip.Color(0, 255, 0, 0); // green 
   
   while(1) {
-    updateTime(&tk);
+    updateTime(&tk, &dc);
 
     for (int i=0; i < 300; i++) {
       // get the time
       char serialBuff[50];
-      unsigned long ms = millis();
+      unsigned long ms = millisCorrected(&dc);
       int hours = getHours(&tk, ms);
       int minutes = getMinutes(&tk, ms);
       int seconds = getSecondsInt(&tk, ms);
