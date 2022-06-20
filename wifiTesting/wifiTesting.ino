@@ -1,8 +1,6 @@
 #include "WiFi.h"
 #include "AsyncUDP.h"
-
-const char * ssid = "ClarkWifi";
-const char * password = "Is it basketball season yet?";
+#include "ClockConstants.h"
 
 int     HTTP_PORT     = 80;
 String  HTTP_METHOD   = "GET";
@@ -17,7 +15,7 @@ void setup()
 {
     Serial.begin(115200);
     WiFi.mode(WIFI_STA);
-    WiFi.begin(ssid, password);
+    WiFi.begin(gWifiName, gWifiPassword);
     if (WiFi.waitForConnectResult() != WL_CONNECTED) {
         Serial.println("WiFi Failed");
         while(1) {

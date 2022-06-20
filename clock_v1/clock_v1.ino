@@ -5,6 +5,7 @@
 #ifdef __AVR__
   #include <avr/power.h>
 #endif
+#include "ClockConstants.h"
 
 
 /* NeoPixel init */
@@ -13,8 +14,6 @@ Adafruit_NeoPixel strip = Adafruit_NeoPixel(72, PIN, NEO_GRBW + NEO_KHZ800);
 
 
 /* wifi init */
-const char * ssid = "ClarkWifi";
-const char * password = "Is it basketball season yet?";
 int     HTTP_PORT     = 80;
 String  HTTP_METHOD   = "GET";
 char    HOST_NAME[]   = "worldclockapi.com";
@@ -140,7 +139,7 @@ void setup()
 {
   Serial.begin(115200);
   WiFi.mode(WIFI_STA);
-  WiFi.begin(ssid, password);
+  WiFi.begin(gWifiName, gWifiPassword);
   if (WiFi.waitForConnectResult() != WL_CONNECTED) {
     Serial.println("WiFi Failed");    
     while(1) {
