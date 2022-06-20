@@ -17,7 +17,8 @@ keeping time).
 
 ### Features
 - [x] Be able to display the current time
-- [ ] Change the seconds display to a smooth animation
 - [ ] Wrapper for time functions to account for the microcontroller's inaccuracy
+- [ ] Refactor display to minimize IO
+- [ ] Change the seconds display to a smooth animation
 - [ ] Animation to play when the hour changes
 - [ ] Second microcontroller with rotary encoder to set timers
