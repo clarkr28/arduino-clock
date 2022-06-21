@@ -261,18 +261,24 @@ void displayTime(ClockState* cs, bool blur) {
     }
 
     /* blur the minute in and out if necessary */
-    if (cs->seconds == 59) {
+    if (cs->seconds == 59 || cs->seconds == 58) {
       // blur the minte out for the last second
       double fracPart, intPart;
       fracPart = modf(cs->fracSeconds, &intPart);
-      int pixelValue = 255 - ceil(fracPart * 255);
+      if (cs->seconds == 59) {
+        fracPart += 1.0;
+      }
+      int pixelValue = 255 - ceil(fracPart / 2 * 255);
       mergePixelColor(cs->minutes + 12, strip.Color(0, pixelValue, 0, 0));
     } 
-    else if (cs->seconds == 0) {
+    else if (cs->seconds == 0 || cs->seconds == 1) {
       // blur the minute in for the first second
       double fracPart, intPart;
       fracPart = modf(cs->fracSeconds, &intPart);
-      int pixelValue = ceil(fracPart * 255);
+      if (cs->seconds == 1) {
+        fracPart += 1.0;
+      }
+      int pixelValue = ceil(fracPart / 2 * 255);
       mergePixelColor(cs->minutes + 12, strip.Color(0, pixelValue, 0, 0));
     } 
     else {
