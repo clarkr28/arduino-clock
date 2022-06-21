@@ -11,6 +11,7 @@
 /* NeoPixel init */
 #define PIN 21
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(72, PIN, NEO_GRBW + NEO_KHZ800);
+int     LOG_BLUR = 0;
 
 
 /* wifi init */
@@ -189,6 +190,117 @@ void updateTime(TimeKeeper* tk, DriftCorrector* dc) {
 }
 
 
+// _______________ Clock Display Section _______________
+
+/**
+ * Display the time on the two rings of LEDs
+ * cs: The clock state to display
+ * blurSecond: true if the second and minute transitions should be blurred
+ */
+void displayTime(ClockState* cs, bool blur) {
+  
+  // clear the display
+  strip.clear();
+
+  // set the overlays
+  uint32_t lightWhite = strip.Color(0, 0, 0, 5);
+  mergePixelColor(0, lightWhite);
+  // set minutes overlays
+  for (int i=0; i < 60; i+=15) {
+    mergePixelColor(i + 12, lightWhite);    
+  }
+
+  // set the hours
+  // remember the hours is set in 24 hour format
+  mergePixelColor(cs->hours % 12, cs->hoursColor);
+  
+
+  if (blur) {
+    if (LOG_BLUR) {
+      Serial.println();
+    }
+
+    /* blur the second over a couple pixels */
+    int currSecond = cs->seconds;
+    
+    for (int i = currSecond - 3; i < currSecond + 5; i++) {
+      int ledIndex = i + 12;
+      if (ledIndex > 71) {
+        ledIndex = ledIndex % 72 + 12;
+      } 
+      else if (ledIndex < 12) {
+        ledIndex += 60;
+      }
+
+      // adding 0.00001 avoids the edge case where fracSeconds
+      // and i are exactly equal (resulting with a distance of zero)
+      float distance = abs(cs->fracSeconds - (float) i) + 0.00001;
+      if (distance > 2.5) {
+        distance = 0;
+      }
+
+      int pixelValue;
+      if (distance > 0) {
+        distance = 255 * distance / 2.5;
+        pixelValue = 255 - (int) distance;
+        if (pixelValue < 0) {
+          pixelValue = 0;
+        }
+      } 
+      else {
+        pixelValue = 0;
+      }
+
+      if (LOG_BLUR) {
+        char buff[50];
+        sprintf(buff, "%02i %02i %i", currSecond, i, pixelValue);
+        Serial.println(buff);
+      }
+      
+      mergePixelColor(ledIndex, strip.Color(0, 0, pixelValue, 0));
+    }
+
+    /* blur the minute in and out if necessary */
+    if (cs->seconds == 59) {
+      // blur the minte out for the last second
+      double fracPart, intPart;
+      fracPart = modf(cs->fracSeconds, &intPart);
+      int pixelValue = 255 - ceil(fracPart * 255);
+      mergePixelColor(cs->minutes + 12, strip.Color(0, pixelValue, 0, 0));
+    } 
+    else if (cs->seconds == 0) {
+      // blur the minute in for the first second
+      double fracPart, intPart;
+      fracPart = modf(cs->fracSeconds, &intPart);
+      int pixelValue = ceil(fracPart * 255);
+      mergePixelColor(cs->minutes + 12, strip.Color(0, pixelValue, 0, 0));
+    } 
+    else {
+      mergePixelColor(cs->minutes + 12, cs->minutesColor);
+    }
+  } 
+  else {
+    
+    // display the seconds/minutes in a binary method on a single pixel
+    // add 12 because the mintutes/seconds circle comes after the hours circle
+    mergePixelColor(cs->seconds + 12, cs->secondsColor);
+    mergePixelColor(cs->minutes + 12, cs->minutesColor);
+    
+  }
+  strip.show();
+}
+
+
+/**
+ * Merge the passed color with the color already at that index
+ */
+void mergePixelColor(int index, uint32_t newColor) {
+  uint32_t existingColor = strip.getPixelColor(index);
+  existingColor = existingColor | newColor;
+  strip.setPixelColor(index, existingColor);
+}
+
+
 void setup()
 {
   Serial.begin(115200);
@@ -203,31 +315,6 @@ void setup()
 }
 
 
-void displayTime(ClockState* cs) {
-  
-  // clear the display
-  uint32_t off = strip.Color(0, 0, 0, 0);
-  for (int i=0; i < strip.numPixels(); i++) {
-    strip.setPixelColor(i, off); 
-  }
-
-  // set the overlays
-  uint32_t lightWhite = strip.Color(0, 0, 0, 5);
-  strip.setPixelColor(0, lightWhite);
-  // set minutes overlays
-  for (int i=0; i < 60; i+=15) {
-    strip.setPixelColor(i + 12, lightWhite);    
-  }
-
-  // set the time
-  // remember the hours is set in 24 hour format
-  strip.setPixelColor(cs->hours % 12, cs->hoursColor);
-  // remember the minutes loop comes after the 12 hours pixels
-  strip.setPixelColor(cs->minutes + 12, cs->minutesColor);
-  strip.setPixelColor(cs->seconds + 12, cs->secondsColor);
-  strip.show();
-}
-
 
 void loop()
 {
@@ -239,13 +326,13 @@ void loop()
 
   // set colors to use for clock
   cs.hoursColor = strip.Color(255, 0, 0, 0); // red
-  cs.minutesColor = strip.Color(0, 0, 255, 0); // blue
-  cs.secondsColor = strip.Color(0, 255, 0, 0); // green 
+  cs.minutesColor = strip.Color(0, 255, 0, 0); // green
+  cs.secondsColor = strip.Color(0, 0, 255, 0); // blue
   
   while(1) {
     updateTime(&tk, &dc);
 
-    for (int i=0; i < 300; i++) {
+    for (int i=0; i < 20000; i++) {
       // get the time
       char serialBuff[50];
       unsigned long ms = millisCorrected(&dc);
@@ -253,7 +340,7 @@ void loop()
       int minutes = getMinutes(&tk, ms);
       int seconds = getSecondsInt(&tk, ms);
       float fracSeconds = getFracSecond(&tk, ms);
-      if (VERBOSE_TIME) {
+      if (VERBOSE_TIME && i % 25 == 0) {
         sprintf(serialBuff, "%02i:%02i:%02i %f", hours, minutes, seconds, fracSeconds);
         Serial.println(serialBuff);
       }
@@ -263,9 +350,9 @@ void loop()
       cs.minutes = minutes;
       cs.seconds = seconds;
       cs.fracSeconds = fracSeconds;
-      displayTime(&cs);
+      displayTime(&cs, true);
       
-      delay(100);
+      delay(20);
     }
   }  
 }
