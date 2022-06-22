@@ -20,5 +20,6 @@ keeping time).
 - [x] Wrapper for time functions to account for the microcontroller's inaccuracy
 - [x] Change the seconds and minutes display to a smooth animation
 - [ ] Animation to play when the hour changes
+- [ ] Utilize multiple wifi connection options
 - [ ] Use a background process to sync time instead of waiting in the foreground
 - [ ] Second microcontroller with rotary encoder to set timers
